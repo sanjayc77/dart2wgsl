@@ -1,0 +1,5 @@
+targets:
+  $default:
+    builders:
+      dart2wgsl:shader_builder:
+        enabled: true

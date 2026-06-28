@@ -1,0 +1,7 @@
+builders:
+  shader_builder:
+    import: "package:dart2wgsl/src/builder.dart"
+    builder_factories: ["shaderBuilderFactory"]
+    build_extensions: {".shader.dart": [".wgsl.dart"]}
+    auto_apply: dependents
+    build_to: source

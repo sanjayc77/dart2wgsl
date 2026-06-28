@@ -1,0 +1,13 @@
+# Dart/Flutter private files
+.dart_tool/
+.packages
+.pub/
+build/
+
+# IDE/OS files
+.DS_Store
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
