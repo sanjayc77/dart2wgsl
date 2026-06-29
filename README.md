@@ -89,6 +89,39 @@ Vector4 fsMain(VertexOutput input) {
 }
 ```
 
+This transpiles to the following pure WGSL shader:
+
+```wgsl
+// Structs
+struct VertexInput {
+  @location(0) position: vec3<f32>,
+  @location(1) uv: vec2<f32>,
+};
+
+struct VertexOutput {
+  @builtin(position) position: vec4<f32>,
+  @location(0) uv: vec2<f32>,
+};
+
+// Uniforms & Resources
+@group(0) @binding(0) var<uniform> uTime: f32;
+@group(0) @binding(1) var<uniform> uResolution: vec2<f32>;
+
+// Functions
+@vertex
+fn vsMain(input: VertexInput) -> VertexOutput {
+  var out: VertexOutput = VertexOutput(vec4<f32>(input.position.x, input.position.y, input.position.z, 1.0), input.uv);
+  return out;
+}
+
+@fragment
+fn fsMain(input: VertexOutput) -> @location(0) vec4<f32> {
+  var uv: vec2<f32> = input.uv;
+  var color: vec4<f32> = vec4<f32>((0.5 + (0.5 * sin((uTime + (uv.x * 10.0))))), (0.5 + (0.5 * cos((uTime + (uv.y * 10.0))))), (0.5 + (0.5 * sin((uTime + (((uv.x + uv.y)) * 5.0))))), 1.0);
+  return color;
+}
+```
+
 ---
 
 ## Compilation
@@ -134,16 +167,61 @@ To compile manually using the command line:
 dart run bin/dart2wgsl.dart path/to/shader.shader.dart -o path/to/output.wgsl.dart
 ```
 
+### Option C: On-The-Fly Compilation (Web-Safe API)
+
+For dynamic environments like Flutter Web or interactive shader editors, `dart2wgsl` provides a web-safe transpilation API that does not require type resolution or `dart:io`. It recursively resolves imports from a provided memory registry and stitches them together:
+
+```dart
+import 'package:dart2wgsl/dart2wgsl.dart';
+
+void main() {
+  final registry = {
+    'package:my_project/shader.dart': '''
+      import 'package:vector_math/vector_math.dart';
+      import 'utils.dart';
+      @fragment
+      Vector4 fsMain() {
+        return Vector4(getGreen(), 1.0, 0.0, 1.0);
+      }
+    ''',
+    'package:my_project/utils.dart': '''
+      double getGreen() => 0.5;
+    ''',
+  };
+
+  final result = transpileShader('package:my_project/shader.dart', registry);
+
+  if (result.hasErrors) {
+    print('Compilation errors:');
+    for (final error in result.errors) {
+      print('  - ${error.message} at line ${error.line}');
+    }
+  } else {
+    print('Generated WGSL:');
+    print(result.wgsl);
+  }
+}
+```
+
+### Stitching & Dependency Resolution
+
+The `transpileShader` API recursively resolves and stitches imports:
+- **Relative URIs**: Relative import statements (e.g. `import '../utils/math.dart';`) are resolved against the importing file's URI (using `Uri.resolve`) and loaded from the registry.
+- **Circular Imports**: Mutually circular imports (e.g., `shader.dart` imports `common.dart` and vice versa) are tracked and safely parsed once, avoiding infinite loops.
+- **Strict Import Validation**: Custom types and functions must be declared locally or imported from a registered file. Math types (`Vector2`, etc.) and math functions (`sin`, `cos`, etc.) require importing `package:vector_math/vector_math.dart` or `package:dart2wgsl/stdlib.dart`.
+
 ---
 
 ## Restricted Language Dialect
 
-To guarantee that Dart code runs deterministically on the GPU, `dart2wgsl` enforces a restricted dialect of Dart:
+To guarantee that Dart code runs deterministically on the GPU, `dart2wgsl` enforces a restricted dialect of Dart. For complete details on types, annotations, syntax restrictions, and dynamic transpilation rules, see the **[Language Specification](docs/language_specification.md)**.
 
+Key rules include:
 - **No Heap Allocations**: Instantiating custom classes, `List`, `Map`, or `Set` is not allowed in shader bodies. Only vector/matrix constructors and struct constructor initializations are permitted.
 - **No Class Methods**: Custom classes can only define final fields and simple parameter-mapping constructors. They are transpiled directly to WGSL `struct` definitions.
+- **Local Variable Type Inference**: Declaring local variables using `var` or `final` without an explicit type is fully supported; the transpiler omits type annotations in WGSL, letting the WGSL compiler infer it.
 - **No Exceptions**: Banned `try`, `catch`, `finally`, and `throw`.
-- **Bounded loops**: Standard `for` loops with constant index boundaries are allowed. `while` and `do-while` loops are prohibited.
+- **Bounded loops**: Only standard `for` loops with constant boundaries are allowed. `while` and `do-while` loops are prohibited.
 - **No Recursion**: A function cannot call itself.
 
-All mathematical operations should be imported from `package:dart2wgsl/stdlib.dart`, which maps to WGSL-native optimized mathematical functions.
+All mathematical operations should be imported from `package:dart2wgsl/stdlib.dart` or `package:vector_math/vector_math.dart`.

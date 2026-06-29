@@ -14,15 +14,18 @@ double atan2(double y, double x) => math.atan2(y, x);
 // Vector trigonometric functions
 Vector2 sin2(Vector2 v) => Vector2(math.sin(v.x), math.sin(v.y));
 Vector3 sin3(Vector3 v) => Vector3(math.sin(v.x), math.sin(v.y), math.sin(v.z));
-Vector4 sin4(Vector4 v) => Vector4(math.sin(v.x), math.sin(v.y), math.sin(v.z), math.sin(v.w));
+Vector4 sin4(Vector4 v) =>
+    Vector4(math.sin(v.x), math.sin(v.y), math.sin(v.z), math.sin(v.w));
 
 Vector2 cos2(Vector2 v) => Vector2(math.cos(v.x), math.cos(v.y));
 Vector3 cos3(Vector3 v) => Vector3(math.cos(v.x), math.cos(v.y), math.cos(v.z));
-Vector4 cos4(Vector4 v) => Vector4(math.cos(v.x), math.cos(v.y), math.cos(v.z), math.cos(v.w));
+Vector4 cos4(Vector4 v) =>
+    Vector4(math.cos(v.x), math.cos(v.y), math.cos(v.z), math.cos(v.w));
 
 Vector2 tan2(Vector2 v) => Vector2(math.tan(v.x), math.tan(v.y));
 Vector3 tan3(Vector3 v) => Vector3(math.tan(v.x), math.tan(v.y), math.tan(v.z));
-Vector4 tan4(Vector4 v) => Vector4(math.tan(v.x), math.tan(v.y), math.tan(v.z), math.tan(v.w));
+Vector4 tan4(Vector4 v) =>
+    Vector4(math.tan(v.x), math.tan(v.y), math.tan(v.z), math.tan(v.w));
 
 // Math helpers
 double pow(double x, double y) => math.pow(x, y).toDouble();
@@ -42,13 +45,24 @@ double round(double x) => x.roundToDouble();
 double trunc(double x) => x.truncateToDouble();
 double fract(double x) => x - x.floorToDouble();
 
-Vector2 fract2(Vector2 v) => Vector2(v.x - v.x.floorToDouble(), v.y - v.y.floorToDouble());
-Vector3 fract3(Vector3 v) => Vector3(v.x - v.x.floorToDouble(), v.y - v.y.floorToDouble(), v.z - v.z.floorToDouble());
-Vector4 fract4(Vector4 v) => Vector4(v.x - v.x.floorToDouble(), v.y - v.y.floorToDouble(), v.z - v.z.floorToDouble(), v.w - v.w.floorToDouble());
+Vector2 fract2(Vector2 v) =>
+    Vector2(v.x - v.x.floorToDouble(), v.y - v.y.floorToDouble());
+Vector3 fract3(Vector3 v) => Vector3(
+  v.x - v.x.floorToDouble(),
+  v.y - v.y.floorToDouble(),
+  v.z - v.z.floorToDouble(),
+);
+Vector4 fract4(Vector4 v) => Vector4(
+  v.x - v.x.floorToDouble(),
+  v.y - v.y.floorToDouble(),
+  v.z - v.z.floorToDouble(),
+  v.w - v.w.floorToDouble(),
+);
 
 double min(double x, double y) => math.min(x, y);
 double max(double x, double y) => math.max(x, y);
-double clamp(double x, double minVal, double maxVal) => math.max(minVal, math.min(x, maxVal));
+double clamp(double x, double minVal, double maxVal) =>
+    math.max(minVal, math.min(x, maxVal));
 
 Vector2 clamp2(Vector2 v, double minVal, double maxVal) => Vector2(
   math.max(minVal, math.min(v.x, maxVal)),

@@ -122,3 +122,19 @@ Inside shader functions, the following rules are enforced:
 - **No Exceptions**: Banned `try`, `catch`, `finally`, `throw`.
 - **Math built-ins**: Call built-ins through `package:dart2wgsl/stdlib.dart` which translates directly to WGSL equivalents.
 - **Swizzling**: Field access on vectors (`v.xy`, `v.xyz`, `v.x`, `v.y`, etc.) is fully supported and transpiles directly.
+
+---
+
+## 5. Dynamic Compilation & Stitching (On-The-Fly API)
+
+When using the dynamic, web-safe transpilation API (`transpileShader`), compilation is performed on unresolved ASTs (without VM or package-resolution context). The following rules apply:
+
+### 5.1 Import-Based Type & Function Resolution
+Types and functions must be explicitly imported or declared locally within the same unit to be used:
+- **Built-in Primitives** (`double`, `int`, `bool`, `void`) are always available.
+- **Math Types** (`Vector2`, `Vector3`, `Vector4`, `Matrix4`, `Texture2d`, `SamplerState`) and **Built-in Math Functions** (`sin`, `cos`, `mix`, `clamp`, etc.) require an explicit import of `package:vector_math/vector_math.dart` or `package:dart2wgsl/stdlib.dart`.
+- **Custom Classes & Functions** require importing the specific file that declares them. Relative imports (e.g. `import 'math.dart';`) are resolved relative to the current file's URI.
+
+### 5.2 Local Variable Type Inference
+When using `var` or `final` without an explicit type inside shader functions, the transpiler omits type annotations in the generated WGSL (e.g. `var uv = input.uv;` is generated instead of `var uv: vec2<f32> = input.uv;`). The WGSL compiler then infers the type from the initializer.
+

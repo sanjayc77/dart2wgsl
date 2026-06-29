@@ -1,7 +1,11 @@
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 
-int? getAnnotationIntArg(Annotation annotation, String name, int positionalIndex) {
+int? getAnnotationIntArg(
+  Annotation annotation,
+  String name,
+  int positionalIndex,
+) {
   final args = annotation.arguments?.arguments;
   if (args == null) return null;
   for (final arg in args) {
@@ -36,17 +40,28 @@ class WgslTranspilerVisitor extends GeneralizingAstVisitor<String> {
   String _mapType(String dartType) {
     final clean = dartType.replaceAll('?', '').split('.').last;
     switch (clean) {
-      case 'double': return 'f32';
-      case 'int': return 'i32';
-      case 'bool': return 'bool';
-      case 'void': return 'void';
-      case 'Vector2': return 'vec2<f32>';
-      case 'Vector3': return 'vec3<f32>';
-      case 'Vector4': return 'vec4<f32>';
-      case 'Matrix4': return 'mat4x4<f32>';
-      case 'Texture2d': return 'texture_2d<f32>';
-      case 'SamplerState': return 'sampler';
-      default: return clean;
+      case 'double':
+        return 'f32';
+      case 'int':
+        return 'i32';
+      case 'bool':
+        return 'bool';
+      case 'void':
+        return 'void';
+      case 'Vector2':
+        return 'vec2<f32>';
+      case 'Vector3':
+        return 'vec3<f32>';
+      case 'Vector4':
+        return 'vec4<f32>';
+      case 'Matrix4':
+        return 'mat4x4<f32>';
+      case 'Texture2d':
+        return 'texture_2d<f32>';
+      case 'SamplerState':
+        return 'sampler';
+      default:
+        return clean;
     }
   }
 
@@ -102,17 +117,23 @@ class WgslTranspilerVisitor extends GeneralizingAstVisitor<String> {
         if (annName == 'Uniform') {
           final group = getAnnotationIntArg(annotation, 'group', 0) ?? 0;
           final binding = getAnnotationIntArg(annotation, 'binding', 1) ?? 0;
-          buffer.write('@group($group) @binding($binding) var<uniform> $varName: $typeStr;');
+          buffer.write(
+            '@group($group) @binding($binding) var<uniform> $varName: $typeStr;',
+          );
           return buffer.toString();
         } else if (annName == 'Texture2D') {
           final group = getAnnotationIntArg(annotation, 'group', 0) ?? 0;
           final binding = getAnnotationIntArg(annotation, 'binding', 1) ?? 0;
-          buffer.write('@group($group) @binding($binding) var $varName: texture_2d<f32>;');
+          buffer.write(
+            '@group($group) @binding($binding) var $varName: texture_2d<f32>;',
+          );
           return buffer.toString();
         } else if (annName == 'Sampler') {
           final group = getAnnotationIntArg(annotation, 'group', 0) ?? 0;
           final binding = getAnnotationIntArg(annotation, 'binding', 1) ?? 0;
-          buffer.write('@group($group) @binding($binding) var $varName: sampler;');
+          buffer.write(
+            '@group($group) @binding($binding) var $varName: sampler;',
+          );
           return buffer.toString();
         }
       }
@@ -136,13 +157,28 @@ class WgslTranspilerVisitor extends GeneralizingAstVisitor<String> {
       }
     }
 
-    final paramsStr = node.functionExpression.parameters?.parameters.map((p) {
-      final paramType = _mapType(p.declaredElement?.type.getDisplayString(withNullability: false) ?? 'f32');
-      final paramName = p.name?.lexeme ?? '';
-      return '$paramName: $paramType';
-    }).join(', ') ?? '';
+    final paramsStr =
+        node.functionExpression.parameters?.parameters
+            .map((p) {
+              String rawType = 'f32';
+              if (p.declaredElement?.type != null) {
+                rawType = p.declaredElement!.type.getDisplayString(
+                  withNullability: false,
+                );
+              } else if (p is SimpleFormalParameter && p.type != null) {
+                rawType = p.type!.toString();
+              }
+              final paramType = _mapType(rawType);
+              final paramName = p.name?.lexeme ?? '';
+              return '$paramName: $paramType';
+            })
+            .join(', ') ??
+        '';
 
-    final returnTypeRaw = node.returnType?.type?.getDisplayString(withNullability: false) ?? 'void';
+    final returnTypeRaw =
+        node.returnType?.type?.getDisplayString(withNullability: false) ??
+        node.returnType?.toString() ??
+        'void';
     String returnTypeStr = _mapType(returnTypeRaw);
 
     if (isFragment && returnTypeStr != 'void' && returnTypeRaw == 'Vector4') {
@@ -181,11 +217,17 @@ class WgslTranspilerVisitor extends GeneralizingAstVisitor<String> {
     for (final variable in node.variables.variables) {
       final name = variable.name.lexeme;
       final type = variable.declaredElement?.type;
-      final typeStr = type != null 
-          ? _mapType(type.getDisplayString(withNullability: false)) 
-          : _mapType(node.variables.type?.toString() ?? 'f32');
-      final init = variable.initializer != null ? ' = ${variable.initializer!.accept(this)}' : '';
-      buffer.write('var $name: $typeStr$init;');
+      String? typeStr;
+      if (type != null) {
+        typeStr = _mapType(type.getDisplayString(withNullability: false));
+      } else if (node.variables.type != null) {
+        typeStr = _mapType(node.variables.type!.toString());
+      }
+      final typeAnnotation = typeStr != null ? ': $typeStr' : '';
+      final init = variable.initializer != null
+          ? ' = ${variable.initializer!.accept(this)}'
+          : '';
+      buffer.write('var $name$typeAnnotation$init;');
     }
     return buffer.toString();
   }
@@ -199,7 +241,9 @@ class WgslTranspilerVisitor extends GeneralizingAstVisitor<String> {
   String visitIfStatement(IfStatement node) {
     final cond = node.expression.accept(this);
     final thenBranch = node.thenStatement.accept(this);
-    final elseBranch = node.elseStatement != null ? ' else ${node.elseStatement!.accept(this)}' : '';
+    final elseBranch = node.elseStatement != null
+        ? ' else ${node.elseStatement!.accept(this)}'
+        : '';
     return 'if ($cond) $thenBranch$elseBranch';
   }
 
@@ -213,7 +257,9 @@ class WgslTranspilerVisitor extends GeneralizingAstVisitor<String> {
       } else if (parts is ForPartsWithExpression) {
         initStr = parts.initialization?.accept(this) ?? '';
       }
-      final cleanInit = initStr.endsWith(';') ? initStr.substring(0, initStr.length - 1) : initStr;
+      final cleanInit = initStr.endsWith(';')
+          ? initStr.substring(0, initStr.length - 1)
+          : initStr;
       final condStr = parts.condition?.accept(this) ?? 'true';
       final updatersStr = parts.updaters.map((u) => u.accept(this)).join(', ');
       final body = node.body.accept(this) ?? '{}';
@@ -224,7 +270,9 @@ class WgslTranspilerVisitor extends GeneralizingAstVisitor<String> {
 
   @override
   String visitReturnStatement(ReturnStatement node) {
-    final expr = node.expression != null ? ' ${node.expression!.accept(this)}' : '';
+    final expr = node.expression != null
+        ? ' ${node.expression!.accept(this)}'
+        : '';
     return 'return$expr;';
   }
 
@@ -266,7 +314,9 @@ class WgslTranspilerVisitor extends GeneralizingAstVisitor<String> {
   @override
   String visitMethodInvocation(MethodInvocation node) {
     final name = node.methodName.name;
-    final args = node.argumentList.arguments.map((e) => e.accept(this)).join(', ');
+    final args = node.argumentList.arguments
+        .map((e) => e.accept(this))
+        .join(', ');
 
     // Fallback if vector constructors are parsed as method calls
     if (['Vector2', 'Vector3', 'Vector4', 'Matrix4'].contains(name)) {
@@ -275,12 +325,18 @@ class WgslTranspilerVisitor extends GeneralizingAstVisitor<String> {
 
     String mappedName = name;
 
-    if (['sin2', 'sin3', 'sin4'].contains(name)) mappedName = 'sin';
-    else if (['cos2', 'cos3', 'cos4'].contains(name)) mappedName = 'cos';
-    else if (['tan2', 'tan3', 'tan4'].contains(name)) mappedName = 'tan';
-    else if (['fract2', 'fract3', 'fract4'].contains(name)) mappedName = 'fract';
-    else if (['clamp2', 'clamp3', 'clamp4'].contains(name)) mappedName = 'clamp';
-    else if (['mix2', 'mix3', 'mix4'].contains(name)) mappedName = 'mix';
+    if (['sin2', 'sin3', 'sin4'].contains(name))
+      mappedName = 'sin';
+    else if (['cos2', 'cos3', 'cos4'].contains(name))
+      mappedName = 'cos';
+    else if (['tan2', 'tan3', 'tan4'].contains(name))
+      mappedName = 'tan';
+    else if (['fract2', 'fract3', 'fract4'].contains(name))
+      mappedName = 'fract';
+    else if (['clamp2', 'clamp3', 'clamp4'].contains(name))
+      mappedName = 'clamp';
+    else if (['mix2', 'mix3', 'mix4'].contains(name))
+      mappedName = 'mix';
 
     if (node.target != null) {
       final targetStr = node.target!.accept(this);
@@ -320,7 +376,9 @@ class WgslTranspilerVisitor extends GeneralizingAstVisitor<String> {
   String visitInstanceCreationExpression(InstanceCreationExpression node) {
     final className = node.constructorName.type.name2.lexeme;
     final glslType = _mapType(className);
-    final args = node.argumentList.arguments.map((e) => e.accept(this)).join(', ');
+    final args = node.argumentList.arguments
+        .map((e) => e.accept(this))
+        .join(', ');
     return '$glslType($args)';
   }
 
