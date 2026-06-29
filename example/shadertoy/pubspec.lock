@@ -105,6 +105,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "8.12.6"
+  characters:
+    dependency: transitive
+    description:
+      name: characters
+      sha256: faf38497bda5ead2a8c7615f4f7939df04333478bf32e4173fcb06d428b5716b
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.4.1"
   checked_yaml:
     dependency: transitive
     description:
@@ -192,6 +200,43 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+  flutter:
+    dependency: "direct main"
+    description: flutter
+    source: sdk
+    version: "0.0.0"
+  flutter_gpux:
+    dependency: "direct main"
+    description:
+      name: flutter_gpux
+      sha256: "5500994d046e07c2f17c3186bbd45af916d7e67837f0ee4b4cf7158b7c9dec81"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
+  flutter_lints:
+    dependency: "direct dev"
+    description:
+      name: flutter_lints
+      sha256: "9e8c3858111da373efc5aa341de011d9bd23e2c5c5e0c62bccf32438e192d7b1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.2"
+  flutter_webgpu:
+    dependency: transitive
+    description:
+      name: flutter_webgpu
+      sha256: "5a12e0910dcacaba0f3a8dac9b4794a587979f98ac216fa9790380f55c97853b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
+  flutter_wgpu:
+    dependency: transitive
+    description:
+      name: flutter_wgpu
+      sha256: d3bf0011b82432843835f808a66b06c7fcd2b5eec9e7d1e8bfe253126fbba721
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   frontend_server_client:
     dependency: transitive
     description:
@@ -288,6 +333,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.12.0"
+  lints:
+    dependency: transitive
+    description:
+      name: lints
+      sha256: cbf8d4b858bb0134ef3ef87841abdf8d63bfc255c266b7bf6b39daa1085c4290
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   logging:
     dependency: transitive
     description:
@@ -304,14 +357,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.12.20"
+  material_color_utilities:
+    dependency: transitive
+    description:
+      name: material_color_utilities
+      sha256: "9c337007e82b1889149c82ed242ed1cb24a66044e30979c44912381e9be4c48b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.13.0"
   meta:
     dependency: transitive
     description:
       name: meta
-      sha256: c82594181e3312f3d0695fc95aaaf7758d75b8d4ae2bbecf223b9fd5109a059d
+      sha256: "1741988757a65eb6b36abe716829688cf01910bbf91c34354ff7ec1c3de2b349"
       url: "https://pub.dev"
     source: hosted
-    version: "1.18.3"
+    version: "1.18.0"
   mime:
     dependency: transitive
     description:
@@ -400,6 +461,11 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.1"
+  sky_engine:
+    dependency: transitive
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   source_span:
     dependency: transitive
     description:
@@ -484,10 +550,10 @@ packages:
     dependency: "direct main"
     description:
       name: vector_math
-      sha256: "1d774bbdf6b72a0b12122fc1560c9c2d2a67db5a4a4cc2bd8a5c990ab20e3188"
+      sha256: d530bd74fea330e6e364cda7a85019c434070188383e1cd8d9777ee586914c5b
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.0"
+    version: "2.2.0"
   watcher:
     dependency: transitive
     description:
@@ -521,7 +587,7 @@ packages:
     source: hosted
     version: "3.0.3"
   wgpu:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: wgpu
       sha256: "578b9d6e5751483cfec144962d33466c98f621a0d1fe89923289e7be8980da22"
@@ -538,3 +604,4 @@ packages:
     version: "3.1.3"
 sdks:
   dart: ">=3.12.0 <4.0.0"
+  flutter: ">=3.38.0"

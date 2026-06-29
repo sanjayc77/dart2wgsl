@@ -40,9 +40,13 @@ This document serves as the orientation guide, behavioral rules, and architectur
 - **No Unused Imports in Generated Output**: Ensure that imports like `package:dart2wgsl/annotations.dart` or `package:vector_math/vector_math.dart` are stripped from the transpiled output.
 
 ## Work in Progress (WIP)
-- Implementing Step 1: Base project setup, annotations, stdlib, and specifications.
+- Implementing Step 4: `test/goldens/` testing harness.
+
+## Completed Work
+- **Step 1**: Base project setup, annotations, stdlib, and specifications.
+- **Step 2**: Validation and transpiler visitors.
+- **Step 3**: CLI and Custom `build_runner` Builder.
+- **Step 4 (Part 2)**: Fully functional `example/shadertoy` WebGPU Flutter Web application.
 
 ## Planned Work
-- **Step 2**: Implement validation and transpiler visitors.
-- **Step 3**: Implement CLI and Custom `build_runner` Builder.
-- **Step 4**: Implement `test/goldens/` testing harness and the `example/shadertoy` WebGPU application.
+- Finish Step 4: Implement the `test/goldens/` testing harness to protect the compiler against code generation regressions.
