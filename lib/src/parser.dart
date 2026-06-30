@@ -38,8 +38,9 @@ Future<List<CompilationUnit>> crawlLibraryAsts(
     // Skip dart2wgsl library itself to avoid transpiling annotations/stdlib
     if (lib.name == 'dart2wgsl' || lib.name.startsWith('dart2wgsl.')) return;
     if (lib.source.uri.scheme == 'package' &&
-        lib.source.uri.pathSegments.first == 'dart2wgsl')
+        lib.source.uri.pathSegments.first == 'dart2wgsl') {
       return;
+    }
 
     final resolvedUnit = await lib.session.getResolvedUnit(path);
     if (resolvedUnit is ResolvedUnitResult) {

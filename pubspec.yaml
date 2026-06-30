@@ -1,11 +1,14 @@
 name: dart2wgsl
 description: A tool to transpile a restricted subset of Dart to WGSL (WebGPU Shading Language).
 version: 0.1.0
+homepage: https://github.com/sanjayc77/dart2wgsl
+repository: https://github.com/sanjayc77/dart2wgsl
 
 environment:
   sdk: ^3.12.0
 
 dependencies:
+  args: ^2.5.0
   meta: ^1.11.0
   analyzer: ^6.2.0
   build: ^2.4.1

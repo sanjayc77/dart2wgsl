@@ -49,7 +49,7 @@ double noise(Vector2 n) {
   var fractN = fract2(n);
   var fx = smoothstep(0.0, 1.0, fractN.x);
   var fy = smoothstep(0.0, 1.0, fractN.y);
-  
+
   var dYx = Vector2(d.y, d.x);
   var dXy = Vector2(d.x, d.y);
   var dYy = Vector2(d.y, d.y);
@@ -57,7 +57,7 @@ double noise(Vector2 n) {
   return mix(
     mix(rand(b), rand(b + dYx), fx),
     mix(rand(b + dXy), rand(b + dYy), fx),
-    fy
+    fy,
   );
 }
 
@@ -89,13 +89,13 @@ Vector4 fsMain(VertexOutput input) {
 
   final speed = Vector2(0.1, 0.9);
   const alpha = 1.0;
-    
+
   var dist = 3.5 - sin(iTime * 0.4) / 1.89;
-    
+
   var p = fragCoord * dist * (1.0 / iResolution.x);
   p += sin2(Vector2(p.y, p.x) * 4.0 + Vector2(0.2, -0.3) * iTime) * 0.04;
   p += sin2(Vector2(p.y, p.x) * 8.0 + Vector2(0.6, 0.1) * iTime) * 0.01;
-    
+
   p.x -= iTime / 1.1;
 
   var valQ = -iTime * 0.3 + 1.0 * sin(iTime + 0.5) / 2.0;
@@ -119,17 +119,19 @@ Vector4 fsMain(VertexOutput input) {
   var valR2 = q - iTime * speed.y;
   var r = Vector2(
     fbm(p + Vector2(valR1, valR1)),
-    fbm(p + Vector2(valR2, valR2))
+    fbm(p + Vector2(valR2, valR2)),
   );
 
   // var c = mix3(c1, c2, fbm(p + r)) + mix3(c3, c4, r.x) - mix3(c5, c6, r.y);
-  
-  var color = Vector3(1.0, 0.2, 0.05) * (1.0 / pow((r.y + r.y) * max(0.0, p.y) + 0.1, 4.0));
-  
+
+  var color =
+      Vector3(1.0, 0.2, 0.05) *
+      (1.0 / pow((r.y + r.y) * max(0.0, p.y) + 0.1, 4.0));
+
   color = Vector3(
     color.x / (1.0 + max(0.0, color.x)),
     color.y / (1.0 + max(0.0, color.y)),
-    color.z / (1.0 + max(0.0, color.z))
+    color.z / (1.0 + max(0.0, color.z)),
   );
 
   return Vector4(color.x, color.y, color.z, alpha);

@@ -1,6 +1,8 @@
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 
+/// Helper to extract an integer argument from an [annotation].
+/// Checks for named argument [name] or fallback [positionalIndex].
 int? getAnnotationIntArg(
   Annotation annotation,
   String name,
@@ -24,6 +26,7 @@ int? getAnnotationIntArg(
   return null;
 }
 
+/// Helper to extract a string argument from an [annotation] at [positionalIndex].
 String? getAnnotationStringArg(Annotation annotation, int positionalIndex) {
   final args = annotation.arguments?.arguments;
   if (args == null || positionalIndex >= args.length) return null;
@@ -36,6 +39,7 @@ String? getAnnotationStringArg(Annotation annotation, int positionalIndex) {
   return null;
 }
 
+/// Visitor that transpiles a verified Dart AST unit into WGSL shader code.
 class WgslTranspilerVisitor extends GeneralizingAstVisitor<String> {
   String _mapType(String dartType) {
     final clean = dartType.replaceAll('?', '').split('.').last;
@@ -323,53 +327,70 @@ class WgslTranspilerVisitor extends GeneralizingAstVisitor<String> {
       return '${_mapType(name)}($args)';
     }
 
-    String mappedName = name;
+    const nameMap = {
+      'sin2': 'sin',
+      'sin3': 'sin',
+      'sin4': 'sin',
+      'cos2': 'cos',
+      'cos3': 'cos',
+      'cos4': 'cos',
+      'tan2': 'tan',
+      'tan3': 'tan',
+      'tan4': 'tan',
+      'sinh2': 'sinh',
+      'sinh3': 'sinh',
+      'sinh4': 'sinh',
+      'cosh2': 'cosh',
+      'cosh3': 'cosh',
+      'cosh4': 'cosh',
+      'tanh2': 'tanh',
+      'tanh3': 'tanh',
+      'tanh4': 'tanh',
+      'asinh2': 'asinh',
+      'asinh3': 'asinh',
+      'asinh4': 'asinh',
+      'acosh2': 'acosh',
+      'acosh3': 'acosh',
+      'acosh4': 'acosh',
+      'atanh2': 'atanh',
+      'atanh3': 'atanh',
+      'atanh4': 'atanh',
+      'fract2': 'fract',
+      'fract3': 'fract',
+      'fract4': 'fract',
+      'clamp2': 'clamp',
+      'clamp3': 'clamp',
+      'clamp4': 'clamp',
+      'mix2': 'mix',
+      'mix3': 'mix',
+      'mix4': 'mix',
+      'saturate2': 'saturate',
+      'saturate3': 'saturate',
+      'saturate4': 'saturate',
+      'fma2': 'fma',
+      'fma3': 'fma',
+      'fma4': 'fma',
+      'reflect2': 'reflect',
+      'reflect3': 'reflect',
+      'reflect4': 'reflect',
+      'refract2': 'refract',
+      'refract3': 'refract',
+      'refract4': 'refract',
+      'dpdx2': 'dpdx',
+      'dpdx3': 'dpdx',
+      'dpdx4': 'dpdx',
+      'dpdy2': 'dpdy',
+      'dpdy3': 'dpdy',
+      'dpdy4': 'dpdy',
+      'fwidth2': 'fwidth',
+      'fwidth3': 'fwidth',
+      'fwidth4': 'fwidth',
+      'toF32': 'f32',
+      'toI32': 'i32',
+      'toU32': 'u32',
+    };
 
-    if (['sin2', 'sin3', 'sin4'].contains(name))
-      mappedName = 'sin';
-    else if (['cos2', 'cos3', 'cos4'].contains(name))
-      mappedName = 'cos';
-    else if (['tan2', 'tan3', 'tan4'].contains(name))
-      mappedName = 'tan';
-    else if (['sinh2', 'sinh3', 'sinh4'].contains(name))
-      mappedName = 'sinh';
-    else if (['cosh2', 'cosh3', 'cosh4'].contains(name))
-      mappedName = 'cosh';
-    else if (['tanh2', 'tanh3', 'tanh4'].contains(name))
-      mappedName = 'tanh';
-    else if (['asinh2', 'asinh3', 'asinh4'].contains(name))
-      mappedName = 'asinh';
-    else if (['acosh2', 'acosh3', 'acosh4'].contains(name))
-      mappedName = 'acosh';
-    else if (['atanh2', 'atanh3', 'atanh4'].contains(name))
-      mappedName = 'atanh';
-    else if (['fract2', 'fract3', 'fract4'].contains(name))
-      mappedName = 'fract';
-    else if (['clamp2', 'clamp3', 'clamp4'].contains(name))
-      mappedName = 'clamp';
-    else if (['mix2', 'mix3', 'mix4'].contains(name))
-      mappedName = 'mix';
-    else if (['saturate2', 'saturate3', 'saturate4'].contains(name))
-      mappedName = 'saturate';
-    else if (['fma2', 'fma3', 'fma4'].contains(name))
-      mappedName = 'fma';
-    else if (['reflect2', 'reflect3', 'reflect4'].contains(name))
-      mappedName = 'reflect';
-    else if (['refract2', 'refract3', 'refract4'].contains(name))
-      mappedName = 'refract';
-    else if (['dpdx2', 'dpdx3', 'dpdx4'].contains(name))
-      mappedName = 'dpdx';
-    else if (['dpdy2', 'dpdy3', 'dpdy4'].contains(name))
-      mappedName = 'dpdy';
-    else if (['fwidth2', 'fwidth3', 'fwidth4'].contains(name))
-      mappedName = 'fwidth';
-    else if (name == 'toF32')
-      mappedName = 'f32';
-    else if (name == 'toI32')
-      mappedName = 'i32';
-    else if (name == 'toU32')
-      mappedName = 'u32';
-
+    final mappedName = nameMap[name] ?? name;
 
     if (node.target != null) {
       final targetStr = node.target!.accept(this);
@@ -445,7 +466,9 @@ class WgslTranspilerVisitor extends GeneralizingAstVisitor<String> {
   }
 }
 
+/// Orchestrates compilation/transpilation of Dart compilation units to WGSL.
 class ShaderTranspiler {
+  /// Transpiles the given list of validated compilation [units] into a single WGSL source string.
   static String transpile(List<CompilationUnit> units) {
     final structs = <String>[];
     final uniforms = <String>[];

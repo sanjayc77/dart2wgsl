@@ -46,10 +46,11 @@ class ShaderBuilder implements Builder {
       ..removeWhere((s) => s.isEmpty);
     String varName = 'shaderSource';
     if (words.isNotEmpty) {
-      varName =
-          words.first.toLowerCase() +
-          words.skip(1).map((s) => s[0].toUpperCase() + s.substring(1)).join() +
-          'Shader';
+      final camelCased = words
+          .skip(1)
+          .map((s) => s[0].toUpperCase() + s.substring(1))
+          .join();
+      varName = '${words.first.toLowerCase()}${camelCased}Shader';
     }
 
     final outputContent =
@@ -60,11 +61,11 @@ const String $varName = r"""
 $wgslSource""";
 ''';
 
-    final outputId = AssetId(
-      inputId.package,
-      inputId.path.substring(0, inputId.path.length - '.shader.dart'.length) +
-          '.wgsl.dart',
+    final prefix = inputId.path.substring(
+      0,
+      inputId.path.length - '.shader.dart'.length,
     );
+    final outputId = AssetId(inputId.package, '$prefix.wgsl.dart');
     await buildStep.writeAsString(outputId, outputContent);
   }
 }

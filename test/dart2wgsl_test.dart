@@ -26,7 +26,10 @@ void main() {
       final transpiled = ShaderTranspiler.transpile(units);
       final expected = await File(goldenPath).readAsString();
 
-      expect(normalizeWhitespace(transpiled), equals(normalizeWhitespace(expected)));
+      expect(
+        normalizeWhitespace(transpiled),
+        equals(normalizeWhitespace(expected)),
+      );
     });
   });
 
@@ -39,7 +42,10 @@ void main() {
       final errors = ShaderValidator.validate(units);
       expect(errors, isNotEmpty);
       expect(
-        errors.any((e) => e.message.contains('Methods are not supported in struct class')),
+        errors.any(
+          (e) =>
+              e.message.contains('Methods are not supported in struct class'),
+        ),
         isTrue,
       );
     });
@@ -65,7 +71,10 @@ void main() {
       final errors = ShaderValidator.validate(units);
       expect(errors, isNotEmpty);
       expect(
-        errors.any((e) => e.message.contains('List') || e.message.contains('not supported')),
+        errors.any(
+          (e) =>
+              e.message.contains('List') || e.message.contains('not supported'),
+        ),
         isTrue,
       );
     });

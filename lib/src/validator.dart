@@ -2,12 +2,21 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/type.dart';
 
+/// Represents a validation error in Dart shader code.
 class ValidationError {
+  /// The file path of the Dart source file where the error occurred.
   final String filePath;
+
+  /// The line number (1-indexed) where the error occurred.
   final int line;
+
+  /// The column number (1-indexed) where the error occurred.
   final int column;
+
+  /// The error description message.
   final String message;
 
+  /// Creates a new [ValidationError] with the given location and description.
   ValidationError({
     required this.filePath,
     required this.line,
@@ -20,11 +29,17 @@ class ValidationError {
 }
 
 /// Visitor that validates a Dart AST unit for WGSL compatibility.
-/// Visitor that validates a Dart AST unit for WGSL compatibility.
 class ShaderValidationVisitor extends RecursiveAstVisitor<void> {
+  /// The path to the file currently being validated.
   final String filePath;
+
+  /// The list of validation errors collected by this visitor.
   final List<ValidationError> errors = [];
+
+  /// The set of allowed types (e.g., structures, vectors, matrices) in this unit.
   final Set<String> allowedTypes;
+
+  /// The set of allowed functions in this unit.
   final Set<String> allowedFunctions;
 
   static const _builtInMathFunctions = {
@@ -135,6 +150,7 @@ class ShaderValidationVisitor extends RecursiveAstVisitor<void> {
     'max',
   };
 
+  /// Creates a new [ShaderValidationVisitor] for [filePath].
   ShaderValidationVisitor(
     this.filePath,
     this.allowedTypes,
@@ -373,8 +389,13 @@ class ShaderValidationVisitor extends RecursiveAstVisitor<void> {
   }
 }
 
-/// Helper class to coordinate validation across multiple units.
+/// Helper class to coordinate validation across multiple compilation units.
 class ShaderValidator {
+  /// Validates the given list of compilation [units] for WGSL compatibility.
+  ///
+  /// Optionally accepts [unitUris] mapping units to their source URIs,
+  /// [unitAllowedTypes] mapping units to allowed types, and
+  /// [unitAllowedFunctions] mapping units to allowed functions.
   static List<ValidationError> validate(
     List<CompilationUnit> units, {
     Map<CompilationUnit, String>? unitUris,

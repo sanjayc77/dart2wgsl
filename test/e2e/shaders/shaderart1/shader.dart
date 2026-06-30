@@ -50,7 +50,9 @@ Vector3 palette(double t) {
 
 @fragment
 Vector4 fsMain(VertexOutput input) {
-  var uv = (Vector2(input.position.x, input.position.y) * 2.0 - uResolution) * (1.0 / uResolution.y);
+  var uv =
+      (Vector2(input.position.x, input.position.y) * 2.0 - uResolution) *
+      (1.0 / uResolution.y);
   final uv0 = uv;
   var finalColor = Vector3(0.0, 0.0, 0.0);
 
