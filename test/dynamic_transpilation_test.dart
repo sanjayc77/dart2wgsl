@@ -194,5 +194,44 @@ double add(double a, double b) {
       expect(result.wgsl, contains('fn add'));
       expect(result.wgsl, contains('fn fsMain'));
     });
+
+    test('transpiles newly added math and derivative functions', () {
+      final registry = {
+        'package:my_project/shader.dart': '''
+import 'package:vector_math/vector_math.dart';
+import 'package:dart2wgsl/stdlib.dart';
+
+@fragment
+Vector4 fsMain() {
+  var s = sinh(1.0);
+  var sh = sinh2(Vector2(1.0, 2.0));
+  var sat = saturate(0.5);
+  var satv = saturate2(Vector2(0.1, 0.2));
+  var f = fma(1.0, 2.0, 3.0);
+  var fv = fma2(Vector2(1.0, 2.0), Vector2(3.0, 4.0), Vector2(5.0, 6.0));
+  var r = reflect(Vector2(1.0, 2.0), Vector2(0.0, 1.0));
+  var rv = reflect2(Vector2(1.0, 2.0), Vector2(0.0, 1.0));
+  var refr = refract(Vector2(1.0, 2.0), Vector2(0.0, 1.0), 0.5);
+  var refrv = refract2(Vector2(1.0, 2.0), Vector2(0.0, 1.0), 0.5);
+  var dx = dpdx(1.0);
+  var dx2 = dpdx2(Vector2(1.0, 2.0));
+  return Vector4(s, sat, f, dx);
+}
+''',
+      };
+
+      final result = transpileShader(
+        'package:my_project/shader.dart',
+        registry,
+      );
+
+      expect(result.hasErrors, isFalse);
+      expect(result.wgsl, contains('sinh'));
+      expect(result.wgsl, contains('saturate'));
+      expect(result.wgsl, contains('fma'));
+      expect(result.wgsl, contains('reflect'));
+      expect(result.wgsl, contains('refract'));
+      expect(result.wgsl, contains('dpdx'));
+    });
   });
 }

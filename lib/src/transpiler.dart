@@ -331,12 +331,45 @@ class WgslTranspilerVisitor extends GeneralizingAstVisitor<String> {
       mappedName = 'cos';
     else if (['tan2', 'tan3', 'tan4'].contains(name))
       mappedName = 'tan';
+    else if (['sinh2', 'sinh3', 'sinh4'].contains(name))
+      mappedName = 'sinh';
+    else if (['cosh2', 'cosh3', 'cosh4'].contains(name))
+      mappedName = 'cosh';
+    else if (['tanh2', 'tanh3', 'tanh4'].contains(name))
+      mappedName = 'tanh';
+    else if (['asinh2', 'asinh3', 'asinh4'].contains(name))
+      mappedName = 'asinh';
+    else if (['acosh2', 'acosh3', 'acosh4'].contains(name))
+      mappedName = 'acosh';
+    else if (['atanh2', 'atanh3', 'atanh4'].contains(name))
+      mappedName = 'atanh';
     else if (['fract2', 'fract3', 'fract4'].contains(name))
       mappedName = 'fract';
     else if (['clamp2', 'clamp3', 'clamp4'].contains(name))
       mappedName = 'clamp';
     else if (['mix2', 'mix3', 'mix4'].contains(name))
       mappedName = 'mix';
+    else if (['saturate2', 'saturate3', 'saturate4'].contains(name))
+      mappedName = 'saturate';
+    else if (['fma2', 'fma3', 'fma4'].contains(name))
+      mappedName = 'fma';
+    else if (['reflect2', 'reflect3', 'reflect4'].contains(name))
+      mappedName = 'reflect';
+    else if (['refract2', 'refract3', 'refract4'].contains(name))
+      mappedName = 'refract';
+    else if (['dpdx2', 'dpdx3', 'dpdx4'].contains(name))
+      mappedName = 'dpdx';
+    else if (['dpdy2', 'dpdy3', 'dpdy4'].contains(name))
+      mappedName = 'dpdy';
+    else if (['fwidth2', 'fwidth3', 'fwidth4'].contains(name))
+      mappedName = 'fwidth';
+    else if (name == 'toF32')
+      mappedName = 'f32';
+    else if (name == 'toI32')
+      mappedName = 'i32';
+    else if (name == 'toU32')
+      mappedName = 'u32';
+
 
     if (node.target != null) {
       final targetStr = node.target!.accept(this);

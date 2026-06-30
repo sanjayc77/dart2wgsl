@@ -26,12 +26,37 @@ fn vsMain(input: VertexInput) -> VertexOutput {
   return out;
 }
 
+
+fn mul3(v1: vec3<f32>, v2: vec3<f32>) -> vec3<f32> {
+  return vec3<f32>((v1.x * v2.x), (v1.y * v2.y), (v1.z * v2.z));
+}
+
+
+fn palette(t: f32) -> vec3<f32> {
+  var a: vec3<f32> = vec3<f32>(0.5, 0.5, 0.5);
+  var b: vec3<f32> = vec3<f32>(0.5, 0.5, 0.5);
+  var c: vec3<f32> = vec3<f32>(1.0, 1.0, 1.0);
+  var d: vec3<f32> = vec3<f32>(0.263, 0.416, 0.557);
+  var cosVal: vec3<f32> = cos(((((c * t) + d)) * 6.28318));
+  return (a + mul3(b, cosVal));
+}
+
 @fragment
 
 fn fsMain(input: VertexOutput) -> @location(0) vec4<f32> {
-  var uv: vec2<f32> = input.uv;
-  var color: vec4<f32> = vec4<f32>((0.5 + (0.5 * sin((uTime + (uv.x * 10.0))))), (0.5 + (0.5 * cos((uTime + (uv.y * 10.0))))), (0.5 + (0.5 * sin((uTime + (((uv.x + uv.y)) * 5.0))))), 1.0);
-  return color;
+  var uv: vec2<f32> = ((((vec2<f32>(input.position.x, input.position.y) * 2.0) - uResolution)) * ((1.0 / uResolution.y)));
+  var uv0: vec2<f32> = uv;
+  var finalColor: vec3<f32> = vec3<f32>(0.0, 0.0, 0.0);
+  for (var i = 0; (i < 4); i++) {
+    uv = (fract((uv * 1.5)) - vec2<f32>(0.5, 0.5));
+    var d: f32 = (length(uv) * exp(-length(uv0)));
+    var col: vec3<f32> = palette(((length(uv0) + (f32(i) * 0.4)) + (uTime * 0.4)));
+    d = (sin(((d * 8.0) + uTime)) / 8.0);
+    d = abs(d);
+    d = pow((0.01 / d), 1.2);
+    finalColor += (col * d);
+  }
+  return vec4<f32>(finalColor.x, finalColor.y, finalColor.z, 1.0);
 }
 
 """;
