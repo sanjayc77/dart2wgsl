@@ -10,4 +10,5 @@ build/
 *.suo
 *.ntvs*
 *.njsproj
-*.sln
+# Discussions
+discussions/*
