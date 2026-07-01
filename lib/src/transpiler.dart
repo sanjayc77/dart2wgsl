@@ -11,17 +11,17 @@ int? getAnnotationIntArg(
   final args = annotation.arguments?.arguments;
   if (args == null) return null;
   for (final arg in args) {
-    if (arg is NamedExpression && arg.name.label.name == name) {
-      final expr = arg.expression;
+    if (arg is NamedArgument && arg.name.lexeme == name) {
+      final expr = arg.argumentExpression;
       if (expr is IntegerLiteral) return expr.value;
     }
   }
   if (positionalIndex < args.length) {
-    var arg = args[positionalIndex];
-    if (arg is NamedExpression) {
-      arg = arg.expression;
-    }
-    if (arg is IntegerLiteral) return arg.value;
+    final arg = args[positionalIndex];
+    final expr = arg is NamedArgument
+        ? arg.argumentExpression
+        : (arg is Expression ? arg : null);
+    if (expr is IntegerLiteral) return expr.value;
   }
   return null;
 }
@@ -30,12 +30,12 @@ int? getAnnotationIntArg(
 String? getAnnotationStringArg(Annotation annotation, int positionalIndex) {
   final args = annotation.arguments?.arguments;
   if (args == null || positionalIndex >= args.length) return null;
-  var arg = args[positionalIndex];
-  if (arg is NamedExpression) {
-    arg = arg.expression;
-  }
-  if (arg is SimpleStringLiteral) return arg.value;
-  if (arg is StringLiteral) return arg.stringValue;
+  final arg = args[positionalIndex];
+  final expr = arg is NamedArgument
+      ? arg.argumentExpression
+      : (arg is Expression ? arg : null);
+  if (expr is SimpleStringLiteral) return expr.value;
+  if (expr is StringLiteral) return expr.stringValue;
   return null;
 }
 
@@ -78,10 +78,10 @@ class WgslTranspilerVisitor extends GeneralizingAstVisitor<String> {
 
   @override
   String visitClassDeclaration(ClassDeclaration node) {
-    final structName = node.name.lexeme;
+    final structName = node.namePart.typeName.lexeme;
     final buffer = StringBuffer();
     buffer.writeln('struct $structName {');
-    for (final member in node.members) {
+    for (final member in node.body.members) {
       if (member is FieldDeclaration) {
         final typeStr = _mapType(member.fields.type?.toString() ?? 'f32');
         String attribs = '';
@@ -165,11 +165,9 @@ class WgslTranspilerVisitor extends GeneralizingAstVisitor<String> {
         node.functionExpression.parameters?.parameters
             .map((p) {
               String rawType = 'f32';
-              if (p.declaredElement?.type != null) {
-                rawType = p.declaredElement!.type.getDisplayString(
-                  withNullability: false,
-                );
-              } else if (p is SimpleFormalParameter && p.type != null) {
+              if (p.declaredFragment?.element.type != null) {
+                rawType = p.declaredFragment!.element.type.getDisplayString();
+              } else if (p is RegularFormalParameter && p.type != null) {
                 rawType = p.type!.toString();
               }
               final paramType = _mapType(rawType);
@@ -180,7 +178,7 @@ class WgslTranspilerVisitor extends GeneralizingAstVisitor<String> {
         '';
 
     final returnTypeRaw =
-        node.returnType?.type?.getDisplayString(withNullability: false) ??
+        node.returnType?.type?.getDisplayString() ??
         node.returnType?.toString() ??
         'void';
     String returnTypeStr = _mapType(returnTypeRaw);
@@ -220,10 +218,10 @@ class WgslTranspilerVisitor extends GeneralizingAstVisitor<String> {
     final buffer = StringBuffer();
     for (final variable in node.variables.variables) {
       final name = variable.name.lexeme;
-      final type = variable.declaredElement?.type;
+      final type = variable.declaredFragment?.element.type;
       String? typeStr;
       if (type != null) {
-        typeStr = _mapType(type.getDisplayString(withNullability: false));
+        typeStr = _mapType(type.getDisplayString());
       } else if (node.variables.type != null) {
         typeStr = _mapType(node.variables.type!.toString());
       }
@@ -428,7 +426,7 @@ class WgslTranspilerVisitor extends GeneralizingAstVisitor<String> {
 
   @override
   String visitInstanceCreationExpression(InstanceCreationExpression node) {
-    final className = node.constructorName.type.name2.lexeme;
+    final className = node.constructorName.type.name.lexeme;
     final glslType = _mapType(className);
     final args = node.argumentList.arguments
         .map((e) => e.accept(this))

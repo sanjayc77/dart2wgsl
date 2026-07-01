@@ -28,17 +28,32 @@ Future<List<CompilationUnit>> crawlLibraryAsts(
   final Set<String> visited = {};
 
   Future<void> visit(LibraryElement lib) async {
-    final path = lib.source.fullName;
+    final path = lib.firstFragment.source.fullName;
     if (visited.contains(path)) return;
     visited.add(path);
 
     // Skip SDK libraries like dart:core or dart:math
     if (lib.isInSdk) return;
 
+    // Skip external packages
+    final rootUri = rootLibrary.firstFragment.source.uri;
+    final libUri = lib.firstFragment.source.uri;
+    if (libUri.scheme == 'package') {
+      final pkgName = libUri.pathSegments.first;
+      if (rootUri.scheme == 'package') {
+        if (pkgName != rootUri.pathSegments.first) return;
+      } else {
+        return;
+      }
+    }
+
     // Skip dart2wgsl library itself to avoid transpiling annotations/stdlib
-    if (lib.name == 'dart2wgsl' || lib.name.startsWith('dart2wgsl.')) return;
-    if (lib.source.uri.scheme == 'package' &&
-        lib.source.uri.pathSegments.first == 'dart2wgsl') {
+    if (lib.name == 'dart2wgsl' ||
+        (lib.name != null && lib.name!.startsWith('dart2wgsl.'))) {
+      return;
+    }
+    if (lib.firstFragment.source.uri.scheme == 'package' &&
+        lib.firstFragment.source.uri.pathSegments.first == 'dart2wgsl') {
       return;
     }
 
@@ -48,7 +63,7 @@ Future<List<CompilationUnit>> crawlLibraryAsts(
     }
 
     // Crawl library parts
-    for (final part in lib.parts) {
+    for (final part in lib.fragments.skip(1)) {
       final partPath = part.source.fullName;
       final partResolved = await lib.session.getResolvedUnit(partPath);
       if (partResolved is ResolvedUnitResult) {
@@ -57,7 +72,7 @@ Future<List<CompilationUnit>> crawlLibraryAsts(
     }
 
     // Crawl library imports
-    for (final imp in lib.libraryImports) {
+    for (final imp in lib.firstFragment.libraryImports) {
       final importedLib = imp.importedLibrary;
       if (importedLib != null) {
         await visit(importedLib);

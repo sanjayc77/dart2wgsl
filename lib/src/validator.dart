@@ -180,7 +180,7 @@ class ShaderValidationVisitor extends RecursiveAstVisitor<void> {
 
   bool _isTypeAllowed(DartType? type, [String? typeName]) {
     if (type != null) {
-      final name = type.getDisplayString(withNullability: false);
+      final name = type.getDisplayString();
       if (allowedTypes.contains(name)) return true;
       final clean = name.split('.').last;
       if (allowedTypes.contains(clean)) return true;
@@ -194,7 +194,7 @@ class ShaderValidationVisitor extends RecursiveAstVisitor<void> {
 
   @override
   void visitClassDeclaration(ClassDeclaration node) {
-    final className = node.name.lexeme;
+    final className = node.namePart.typeName.lexeme;
 
     if (node.extendsClause != null) {
       _addError(
@@ -210,7 +210,7 @@ class ShaderValidationVisitor extends RecursiveAstVisitor<void> {
     }
 
     // Traverse class members to ensure they are only fields or a simple constructor
-    for (final member in node.members) {
+    for (final member in node.body.members) {
       if (member is MethodDeclaration) {
         _addError(
           member,
@@ -308,8 +308,7 @@ class ShaderValidationVisitor extends RecursiveAstVisitor<void> {
   void visitInstanceCreationExpression(InstanceCreationExpression node) {
     final type = node.staticType;
     final typeName =
-        type?.getDisplayString(withNullability: false) ??
-        node.constructorName.type.name2.lexeme;
+        type?.getDisplayString() ?? node.constructorName.type.name.lexeme;
 
     if (!_isTypeAllowed(type, typeName)) {
       _addError(
@@ -343,14 +342,14 @@ class ShaderValidationVisitor extends RecursiveAstVisitor<void> {
     final params = node.functionExpression.parameters;
     if (params != null) {
       for (final param in params.parameters) {
-        final paramType = param.declaredElement?.type;
-        final paramTypeName = (param is SimpleFormalParameter)
+        final paramType = param.declaredFragment?.element.type;
+        final paramTypeName = (param is RegularFormalParameter)
             ? param.type?.toString()
             : null;
         if (!_isTypeAllowed(paramType, paramTypeName)) {
           final display =
               paramTypeName ??
-              param.declaredElement?.type.toString() ??
+              param.declaredFragment?.element.type.toString() ??
               'unknown';
           _addError(
             param,
@@ -410,8 +409,8 @@ class ShaderValidator {
     for (final unit in units) {
       final uri =
           unitUris?[unit] ??
-          unit.declaredElement?.source.uri.toString() ??
-          unit.declaredElement?.source.fullName ??
+          unit.declaredFragment?.source.uri.toString() ??
+          unit.declaredFragment?.source.fullName ??
           'unknown_${unit.hashCode}';
       uris[unit] = uri;
       uriToUnit[uri] = unit;
@@ -429,7 +428,7 @@ class ShaderValidator {
 
       for (final decl in unit.declarations) {
         if (decl is ClassDeclaration) {
-          structs.add(decl.name.lexeme);
+          structs.add(decl.namePart.typeName.lexeme);
         } else if (decl is FunctionDeclaration) {
           functions.add(decl.name.lexeme);
         }
