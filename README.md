@@ -214,7 +214,7 @@ The `transpileShader` API recursively resolves and stitches imports:
 
 ## Restricted Language Dialect
 
-To guarantee that Dart code runs deterministically on the GPU, `dart2wgsl` enforces a restricted dialect of Dart. For complete details on types, annotations, syntax restrictions, and dynamic transpilation rules, see the **[Language Specification](docs/language_specification.md)**.
+To guarantee that Dart code runs deterministically on the GPU, `dart2wgsl` enforces a restricted dialect of Dart. For complete details on types, annotations, syntax restrictions, and dynamic transpilation rules, see the **[Language Specification](doc/language_specification.md)**.
 
 Key rules include:
 - **No Heap Allocations**: Instantiating custom classes, `List`, `Map`, or `Set` is not allowed in shader bodies. Only vector/matrix constructors and struct constructor initializations are permitted.
